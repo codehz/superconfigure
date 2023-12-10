@@ -48,6 +48,7 @@ cp $COSMOS/common.cache ./config.cache
     --without-libatomic --disable-gcov --disable-analyzer --disable-libvtv \
     --disable-libgomp --disable-libatomic \
     --with-gnu-as=yes --with-gnu-ld=yes --build=$ARCH-linux-gnu \
+    --enable-sjlj-exceptions \
     --target=$TARGET_ARCH-linux-cosmo \
     CFLAGS="-Os -D_LARGEFILE64_SOURCE=1"
 
