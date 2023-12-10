@@ -22,7 +22,7 @@ if [ -d "$FOLDER" ]; then
     mkdir -p build/usr/include
 else
     # download the source code
-    git clone --depth=1 --branch=portcosmo-11.2 https://github.com/ahgamut/gcc $FOLDER
+    git clone --depth=1 --branch=portcosmo-11.2 https://github.com/codehz/gcc $FOLDER
     mkdir -p build/usr/include
     # tar
 
