@@ -68,6 +68,7 @@ bin/aarch64-linux-cosmo-size
 bin/aarch64-linux-cosmo-strings
 bin/aarch64-linux-cosmo-strip
 libexec/gcc/aarch64-linux-cosmo/11.2.0/cc1
+libexec/gcc/aarch64-linux-cosmo/11.2.0/cc1obj
 libexec/gcc/aarch64-linux-cosmo/11.2.0/cc1plus
 libexec/gcc/aarch64-linux-cosmo/11.2.0/collect2
 '
