@@ -1,26 +1,26 @@
---- llvm-project-llvmorg-15.0.7/clang/lib/CodeGen/CGBuiltin.cpp 2023-01-12 15:12:30
-+++ - 2023-12-11 22:16:41
+--- llvm-project-llvmorg-15.0.7/clang/lib/CodeGen/CGBuiltin.cpp	2023-01-12 15:12:30
++++ -	2023-12-11 22:16:41
 @@ -3745,39 +3745,39 @@
        return RValue::get(Builder.CreateZExt(Result, Int64Ty, "extend.zext"));
    }
    case Builtin::BI__builtin_setjmp: {
 -    // Buffer is a void**.
 -    Address Buf = EmitPointerWithAlignment(E->getArg(0));
-+    Address Buf = EmitScalarExpr(E->getArg(0));
- 
+-
 -    // Store the frame pointer to the setjmp buffer.
 -    Value *FrameAddr = Builder.CreateCall(
 -        CGM.getIntrinsic(Intrinsic::frameaddress, AllocaInt8PtrTy),
 -        ConstantInt::get(Int32Ty, 0));
 -    Builder.CreateStore(FrameAddr, Buf);
-+    StringRef Name = "_setjmp";
++    Address Buf = EmitScalarExpr(E->getArg(0));
  
 -    // Store the stack pointer to the setjmp buffer.
 -    Value *StackAddr =
 -        Builder.CreateCall(CGM.getIntrinsic(Intrinsic::stacksave));
 -    Address StackSaveSlot = Builder.CreateConstInBoundsGEP(Buf, 2);
 -    Builder.CreateStore(StackAddr, StackSaveSlot);
--
++    StringRef Name = "_setjmp";
+ 
 -    // Call LLVM's EH setjmp, which is lightweight.
 -    Function *F = CGM.getIntrinsic(Intrinsic::eh_sjlj_setjmp);
 -    Buf = Builder.CreateElementBitCast(Buf, Int8Ty);
