@@ -6,7 +6,7 @@
    case Builtin::BI__builtin_setjmp: {
 -    // Buffer is a void**.
 -    Address Buf = EmitPointerWithAlignment(E->getArg(0));
-+    Value *Buf = ScalarExpr(E->getArg(0));
++    Value *Buf = EmitScalarExpr(E->getArg(0));
  
 -    // Store the frame pointer to the setjmp buffer.
 -    Value *FrameAddr = Builder.CreateCall(
