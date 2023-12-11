@@ -6,21 +6,21 @@
    case Builtin::BI__builtin_setjmp: {
 -    // Buffer is a void**.
 -    Address Buf = EmitPointerWithAlignment(E->getArg(0));
--
++    Value *Buf = ScalarExpr(E->getArg(0));
+ 
 -    // Store the frame pointer to the setjmp buffer.
 -    Value *FrameAddr = Builder.CreateCall(
 -        CGM.getIntrinsic(Intrinsic::frameaddress, AllocaInt8PtrTy),
 -        ConstantInt::get(Int32Ty, 0));
 -    Builder.CreateStore(FrameAddr, Buf);
-+    Address Buf = EmitScalarExpr(E->getArg(0));
++    StringRef Name = "_setjmp";
  
 -    // Store the stack pointer to the setjmp buffer.
 -    Value *StackAddr =
 -        Builder.CreateCall(CGM.getIntrinsic(Intrinsic::stacksave));
 -    Address StackSaveSlot = Builder.CreateConstInBoundsGEP(Buf, 2);
 -    Builder.CreateStore(StackAddr, StackSaveSlot);
-+    StringRef Name = "_setjmp";
- 
+-
 -    // Call LLVM's EH setjmp, which is lightweight.
 -    Function *F = CGM.getIntrinsic(Intrinsic::eh_sjlj_setjmp);
 -    Buf = Builder.CreateElementBitCast(Buf, Int8Ty);
@@ -39,10 +39,9 @@
 +    return RValue::get(CB);
    }
    case Builtin::BI__builtin_longjmp: {
--    Value *Buf = EmitScalarExpr(E->getArg(0));
+     Value *Buf = EmitScalarExpr(E->getArg(0));
 -    Buf = Builder.CreateBitCast(Buf, Int8PtrTy);
-+    Address Buf = EmitScalarExpr(E->getArg(0));
-+    Address Val = EmitScalarExpr(E->getArg(1));
++    Value *Val = EmitScalarExpr(E->getArg(1));
  
 -    // Call LLVM's EH longjmp, which is lightweight.
 -    Builder.CreateCall(CGM.getIntrinsic(Intrinsic::eh_sjlj_longjmp), Buf);
