@@ -25,6 +25,7 @@ else
 
     # apply patches if any
     patch -p0 -i minimal.diff
+    patch -p0 -i sjlj.diff
     mkdir -p build
 fi
 

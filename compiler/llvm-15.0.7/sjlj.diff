@@ -1,0 +1,67 @@
+--- llvm-project-llvmorg-15.0.7/clang/lib/CodeGen/CGBuiltin.cpp 2023-01-12 15:12:30
++++ - 2023-12-11 22:16:41
+@@ -3745,39 +3745,39 @@
+       return RValue::get(Builder.CreateZExt(Result, Int64Ty, "extend.zext"));
+   }
+   case Builtin::BI__builtin_setjmp: {
+-    // Buffer is a void**.
+-    Address Buf = EmitPointerWithAlignment(E->getArg(0));
++    Address Buf = EmitScalarExpr(E->getArg(0));
+ 
+-    // Store the frame pointer to the setjmp buffer.
+-    Value *FrameAddr = Builder.CreateCall(
+-        CGM.getIntrinsic(Intrinsic::frameaddress, AllocaInt8PtrTy),
+-        ConstantInt::get(Int32Ty, 0));
+-    Builder.CreateStore(FrameAddr, Buf);
++    StringRef Name = "_setjmp";
+ 
+-    // Store the stack pointer to the setjmp buffer.
+-    Value *StackAddr =
+-        Builder.CreateCall(CGM.getIntrinsic(Intrinsic::stacksave));
+-    Address StackSaveSlot = Builder.CreateConstInBoundsGEP(Buf, 2);
+-    Builder.CreateStore(StackAddr, StackSaveSlot);
+-
+-    // Call LLVM's EH setjmp, which is lightweight.
+-    Function *F = CGM.getIntrinsic(Intrinsic::eh_sjlj_setjmp);
+-    Buf = Builder.CreateElementBitCast(Buf, Int8Ty);
+-    return RValue::get(Builder.CreateCall(F, Buf.getPointer()));
++    llvm::Type *ArgTypes[] = {Int8PtrTy};
++    llvm::AttributeList ReturnsTwiceAttr = llvm::AttributeList::get(
++        getLLVMContext(), llvm::AttributeList::FunctionIndex,
++        llvm::Attribute::ReturnsTwice);
++    llvm::FunctionCallee SetJmpFn = CGM.CreateRuntimeFunction(
++      llvm::FunctionType::get(IntTy, ArgTypes, false), Name,
++      ReturnsTwiceAttr, /*Local=*/true);
++    Buf = Builder.CreateBitOrPointerCast(Buf, Int8PtrTy);
++    llvm::Value *Args[] = {Buf};
++    llvm::CallBase *CB = EmitRuntimeCallOrInvoke(SetJmpFn, Args);
++    CB->setAttributes(ReturnsTwiceAttr);
++    return RValue::get(CB);
+   }
+   case Builtin::BI__builtin_longjmp: {
+-    Value *Buf = EmitScalarExpr(E->getArg(0));
+-    Buf = Builder.CreateBitCast(Buf, Int8PtrTy);
++    Address Buf = EmitScalarExpr(E->getArg(0));
++    Address Val = EmitScalarExpr(E->getArg(1));
+ 
+-    // Call LLVM's EH longjmp, which is lightweight.
+-    Builder.CreateCall(CGM.getIntrinsic(Intrinsic::eh_sjlj_longjmp), Buf);
++    StringRef Name = "_longjmp";
+ 
+-    // longjmp doesn't return; mark this as unreachable.
++    llvm::Type *ArgTypes[] = {Int8PtrTy, Int32Ty};
++    llvm::FunctionCallee LongJmpFn = CGM.CreateRuntimeFunction(
++      llvm::FunctionType::get(VoidTy, ArgTypes, false), Name,
++      ReturnsTwiceAttr, /*Local=*/true);
++    Buf = Builder.CreateBitOrPointerCast(Buf, Int8PtrTy);
++    Val = Builder.CreateBitOrPointerCast(Buf, Int32Ty);
++    llvm::Value *Args[] = {Buf, Val};
++    EmitRuntimeCallOrInvoke(LongJmpFn, Args);
+     Builder.CreateUnreachable();
+-
+-    // We do need to preserve an insertion point.
+     EmitBlock(createBasicBlock("longjmp.cont"));
+-
+     return RValue::get(nullptr);
+   }
+   case Builtin::BI__builtin_launder: {
