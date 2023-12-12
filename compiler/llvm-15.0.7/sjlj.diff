@@ -1,6 +1,6 @@
 --- llvm-project-llvmorg-15.0.7/clang/lib/CodeGen/CGBuiltin.cpp	2023-01-12 15:12:30
 +++ -	2023-12-11 22:16:41
-@@ -3745,39 +3745,39 @@
+@@ -3745,39 +3745,38 @@
        return RValue::get(Builder.CreateZExt(Result, Int64Ty, "extend.zext"));
    }
    case Builtin::BI__builtin_setjmp: {
