@@ -6,7 +6,7 @@
    case Builtin::BI__builtin_setjmp: {
 -    // Buffer is a void**.
 -    Address Buf = EmitPointerWithAlignment(E->getArg(0));
-+    Value *Buf = EmitScalarExpr(E->getArg(0));
++    Value *Buf = ScalarExpr(E->getArg(0));
  
 -    // Store the frame pointer to the setjmp buffer.
 -    Value *FrameAddr = Builder.CreateCall(
@@ -31,7 +31,7 @@
 +        llvm::Attribute::ReturnsTwice);
 +    llvm::FunctionCallee SetJmpFn = CGM.CreateRuntimeFunction(
 +      llvm::FunctionType::get(IntTy, ArgTypes, false), Name,
-+      ReturnsTwiceAttr, /*Local=*/true);
++      ReturnsTwiceAttr);
 +    Buf = Builder.CreateBitOrPointerCast(Buf, Int8PtrTy);
 +    llvm::Value *Args[] = {Buf};
 +    llvm::CallBase *CB = EmitRuntimeCallOrInvoke(SetJmpFn, Args);
@@ -50,8 +50,7 @@
 -    // longjmp doesn't return; mark this as unreachable.
 +    llvm::Type *ArgTypes[] = {Int8PtrTy, Int32Ty};
 +    llvm::FunctionCallee LongJmpFn = CGM.CreateRuntimeFunction(
-+      llvm::FunctionType::get(VoidTy, ArgTypes, false), Name,
-+      ReturnsTwiceAttr, /*Local=*/true);
++      llvm::FunctionType::get(VoidTy, ArgTypes, false), Name);
 +    Buf = Builder.CreateBitOrPointerCast(Buf, Int8PtrTy);
 +    Val = Builder.CreateBitOrPointerCast(Buf, Int32Ty);
 +    llvm::Value *Args[] = {Buf, Val};
