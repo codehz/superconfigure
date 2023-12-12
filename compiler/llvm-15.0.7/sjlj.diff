@@ -63,3 +63,15 @@
      return RValue::get(nullptr);
    }
    case Builtin::BI__builtin_launder: {
+
+--- llvm-project-llvmorg-15.0.7/clang/lib/CodeGen/CGObjCMac.cpp	2023-01-12 15:12:30
++++ -	2023-12-12 15:38:50
+@@ -5972,7 +5972,7 @@
+ 
+   // FIXME: This is the size of the setjmp buffer and should be target
+   // specific. 18 is what's used on 32-bit X86.
+-  uint64_t SetJmpBufferSize = 18;
++  uint64_t SetJmpBufferSize = 44;
+ 
+   // Exceptions
+   llvm::Type *StackPtrTy = llvm::ArrayType::get(CGM.Int8PtrTy, 4);
